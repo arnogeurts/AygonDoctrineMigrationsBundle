@@ -2,7 +2,7 @@
 
 namespace Aygon\DoctrineMigrationsBundle\Command;
 
-use Doctrine\DBAL\Migrations\Tools\Console\Command\DoctrineCommand as BaseCommand;
+use Doctrine\DBAL\Migrations\Tools\Console\Command\AbstractCommand as BaseCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
