@@ -5,6 +5,7 @@ namespace Aygon\DoctrineMigrationsBundle\Migrations\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Migrations\MigrationException;
 use Doctrine\DBAL\Migrations\OutputWriter;
+use Doctrine\DBAL\Migrations\Version;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Types\Type;
@@ -63,7 +64,7 @@ class CollectionConfiguration extends Configuration
     public function getConfiguration($name) 
     {
         if (!array_key_exists($name, $this->configurations)) {
-            throw new MigrationsException(sprintf('No configuration found named %s.', $name));
+            throw new MigrationException(sprintf('No configuration found named %s.', $name));
         }
         return $this->configurations[$name];
     }
@@ -75,7 +76,7 @@ class CollectionConfiguration extends Configuration
      */
     public function getConfigurations() 
     {
-        return $this->configuratoins;
+        return $this->configurations;
     }
     
     /**
@@ -97,7 +98,7 @@ class CollectionConfiguration extends Configuration
     public function getMainConfiguration()
     {
         if ($this->mainConfiguration === null) {
-            throw new MigrationsException('No main configuration defined in collection configuration.');
+            throw new MigrationException('No main configuration defined in collection configuration.');
         }
         return $this->getConfiguration($this->mainConfiguration);
     }
@@ -244,7 +245,10 @@ class CollectionConfiguration extends Configuration
     {
         $migrations = array();
         foreach($this->getConfigurations() as $config) {
-            $migrations = array_merge($migrations, $config->getMigrations());
+            // TODO: find a better way to merge these
+            foreach($config->getMigrations() as $v => $mig) {
+                $migrations[$v]  = $mig;
+            }
         }
         ksort($migrations);
         return $migrations;

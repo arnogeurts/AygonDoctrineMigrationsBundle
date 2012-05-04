@@ -2,15 +2,17 @@
 
 namespace Aygon\DoctrineMigrationsBundle\Migrations\Configuration;
 
+use Aygon\DoctrineMigrationsBundle\Migrations\NamedVersion;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Migrations\Configuration\Configuration;
 use Doctrine\DBAL\Migrations\MigrationException;
 use Doctrine\DBAL\Migrations\OutputWriter;
+use Doctrine\DBAL\Migrations\Version;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\DBAL\Migrations\Configuration\Configuration;
-use Aygon\DoctrineMigrationsBundle\Migrations\NamedVersion;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @author      Arno Geurts
@@ -133,7 +135,7 @@ class NamedConfiguration extends Configuration implements ContainerAwareInterfac
     {
         $this->createMigrationTable();
 
-        $version = $this->connection->fetchColumn("SELECT version FROM " . $this->migrationsTableName . " WHERE version = ? AND name = ?", array($version->getVersion(), $this->getName()));
+        $version = $this->getConnection()->fetchColumn("SELECT version FROM " . $this->getMigrationsTableName() . " WHERE version = ? AND name = ?", array($version->getVersion(), $this->getName()));
         return $version !== false ? true : false;
     }
 
@@ -146,7 +148,7 @@ class NamedConfiguration extends Configuration implements ContainerAwareInterfac
     {
         $this->createMigrationTable();
 
-        $ret = $this->connection->fetchAll("SELECT version FROM " . $this->migrationsTableName . " WHERE name = ?", array($this->getName()));
+        $ret = $this->getConnection()->fetchAll("SELECT version FROM " . $this->getMigrationsTableName() . " WHERE name = ?", array($this->getName()));
         $versions = array();
         foreach ($ret as $version) {
             $versions[] = current($version);
@@ -164,14 +166,18 @@ class NamedConfiguration extends Configuration implements ContainerAwareInterfac
     {
         $this->createMigrationTable();
 
+        if(sizeof($this->migrations) < 1) {
+            return '0';
+        }
+        
         $migratedVersions = array();
         foreach ($this->migrations as $migration) {
             $migratedVersions[] = $migration->getVersion();
         }
-
-        $sql = "SELECT version FROM " . $this->migrationsTableName . " WHERE version IN (" . implode(', ', $migratedVersions) . ") AND name = ? ORDER BY version DESC";
-        $sql = $this->connection->getDatabasePlatform()->modifyLimitQuery($sql, 1);
-        $result = $this->connection->fetchColumn($sql, array($this->getName()));
+        
+        $sql = "SELECT version FROM " . $this->getMigrationsTableName() . " WHERE name = ? AND version IN (" . implode(', ', $migratedVersions) . ") ORDER BY version DESC";
+        $sql = $this->getConnection()->getDatabasePlatform()->modifyLimitQuery($sql, 1);
+        $result = $this->getConnection()->fetchColumn($sql, array($this->getName()));
         return $result !== false ? (string) $result : '0';
     }
 
@@ -184,7 +190,7 @@ class NamedConfiguration extends Configuration implements ContainerAwareInterfac
     {
         $this->createMigrationTable();
 
-        $result = $this->connection->fetchColumn("SELECT COUNT(version) FROM " . $this->migrationsTableName . " WHERE name = ?", array($this->getName()));
+        $result = $this->getConnection()->fetchColumn("SELECT COUNT(version) FROM " . $this->getMigrationsTableName() . " WHERE name = ?", array($this->getName()));
         return $result !== false ? $result : 0;
     }
 
@@ -223,15 +229,15 @@ class NamedConfiguration extends Configuration implements ContainerAwareInterfac
             return false;
         }
 
-        $schema = $this->connection->getSchemaManager()->createSchema();
-        if ( ! $schema->hasTable($this->migrationsTableName)) {
+        $schema = $this->getConnection()->getSchemaManager()->createSchema();
+        if ( ! $schema->hasTable($this->getMigrationsTableName())) {
             $columns = array(
                 'version'  => new Column('version', Type::getType('string'), array('length' => 255)),
 				'name'     => new Column('name', Type::getType('string'), array('length' => 255)),
             );
-            $table = new Table($this->migrationsTableName, $columns);
+            $table = new Table($this->getMigrationsTableName(), $columns);
             $table->setPrimaryKey(array('version'));
-            $this->connection->getSchemaManager()->createTable($table);
+            $this->getConnection()->getSchemaManager()->createTable($table);
 
             $this->migrationTableCreated = true;
 

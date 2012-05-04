@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Doctrine\DBAL\Migrations\OutputWriter;
 use Doctrine\DBAL\Connection;
 use Aygon\DoctrineMigrationsBundle\Migrations\Configuration\NamedConfiguration;
@@ -87,14 +88,20 @@ abstract class DoctrineCommand extends BaseCommand
         foreach($bundles as $bundle) {
             $configuration->addConfiguration(self::createBundleConfiguration($bundle, $container, $conn, $outputWriter));
         }
-        $configuration->addConfiguration(self::createApplicationConfiguration($conn, $container, $outputWriter));
+        $configuration->addConfiguration(self::createApplicationConfiguration($container, $conn, $outputWriter));
         
         // set main configuration in the collection
-        if( ! $input->getDefinition()->hasArgument('name') || $input->getArgument('name') === null) {
-            $main = $container->getParameter('aygon_doctrine_migrations.application_name');
-        } else {
-            $main = $input->getArgument('name');
+        
+        $main = $container->getParameter('aygon_doctrine_migrations.application_name');
+        
+        try {
+            if ($input->getArgument('name')) {
+                $main = $input->getArgument('name');
+            }
+        } catch (\Exception $e) {
+            // do nothing
         }
+
         $configuration->setMainConfiguration($main);
         
         if($verifyDir && ! file_exists($configuration->getMigrationsDirectory())) {
@@ -102,7 +109,7 @@ abstract class DoctrineCommand extends BaseCommand
         }
         
         // set configuration
-        $this->setMigrationConfiguration($configuration);
+        $command->setMigrationConfiguration($configuration);
     }
 
     /**
@@ -120,7 +127,7 @@ abstract class DoctrineCommand extends BaseCommand
         $configuration->setContainer($container);
         $configuration->setMigrationsNamespace($bundle->getNamespace() . '\\' . $container->getParameter('aygon_doctrine_migrations.bundle_namespace'));        
         $directory = str_replace('\\', DIRECTORY_SEPARATOR, $container->getParameter('aygon_doctrine_migrations.bundle_namespace'));
-        $configuration->setMigrationsDirectory($bundle->getPath() . DIRECTORY_SEPERATOR . $directory);
+        $configuration->setMigrationsDirectory($bundle->getPath() . DIRECTORY_SEPARATOR . $directory);
         $configuration->registerMigrationsFromDirectory($configuration->getMigrationsDirectory());
         $configuration->setMigrationsTableName($container->getParameter('aygon_doctrine_migrations.table_name'));
         return $configuration;
