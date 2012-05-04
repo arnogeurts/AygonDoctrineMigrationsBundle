@@ -40,7 +40,7 @@ EOT
     {
         // set application helpers
         DoctrineCommandHelper::setApplicationEntityManager($this->getApplication(), $input->getOption('em'));
-        DoctrineCommand::preExecuteCommand($this, $input, $output);
+        DoctrineCommand::preExecuteCommand($this, $input, $output, true);
         parent::execute($input, $output);
     }
 }

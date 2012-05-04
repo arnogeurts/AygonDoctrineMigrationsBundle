@@ -1,3 +1,3 @@
-DoctrineMigrationsBundle
+AygonDoctrineMigrationsBundle
 ========================
 

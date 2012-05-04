@@ -10,12 +10,19 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Migrations\Configuration\Configuration;
 use Aygon\DoctrineMigrationsBundle\Migrations\NamedVersion;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
 /**
  * @author      Arno Geurts
  */
-class NamedConfiguration extends Configuration
+class NamedConfiguration extends Configuration implements ContainerAwareInterface
 {
+    /**
+     * The DI container
+     * @var ContainerInterface
+     */
+    protected $container;
+    
     /**
      * Flag for whether or not the migration table has been created
      *
@@ -33,7 +40,7 @@ class NamedConfiguration extends Configuration
     /**
      * Construct a migration configuration object.
      *
-	 * @param string $name                The name of the Configuration
+     * @param string $name                The name of the Configuration
      * @param Connection $connection      A Connection instance
      * @param OutputWriter $outputWriter  A OutputWriter instance
      */
@@ -41,6 +48,17 @@ class NamedConfiguration extends Configuration
     {
         parent::__construct($connection, $outputWriter);
         $this->setName($name);
+    }
+    
+    /** 
+     * set the DI container
+     * 
+     * @param Container $container
+     * @return void;
+     */
+    public function setContainer(ContainerInterface $container = null)
+    {
+        $this->container = $container;
     }
 
     /**
@@ -58,6 +76,12 @@ class NamedConfiguration extends Configuration
             throw MigrationException::duplicateMigrationVersion($version, get_class($this->migrations[$version]));
         }
         $version = new NamedVersion($this, $version, $class);
+        
+        // set optional container in migration
+        if($version->getMigration() instanceof ContainerAwareInterface) {
+            $version->getMigration()->setContainer($this->container);
+        }
+        
         $this->migrations[$version->getVersion()] = $version;
         ksort($this->migrations);
         return $version;
