@@ -316,6 +316,20 @@ class CollectionConfiguration extends Configuration
         }
         return $version;
     }
+    
+    /**
+     * Returns an array of available migration version numbers.
+     *
+     * @return array $availableVersions
+     */
+    public function getAvailableVersions()
+    {
+        $availableVersions = array();
+        foreach ($this->getConfigurations() as $config) {
+            $availableVersions = array_merge($availableVersions, $config->getAvailableVersions());
+        }
+        return $availableVersions;
+    }
 
     /**
      * Returns the current migrated version from the versions table.
