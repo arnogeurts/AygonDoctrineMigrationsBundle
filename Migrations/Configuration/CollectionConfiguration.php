@@ -419,6 +419,11 @@ class CollectionConfiguration extends Configuration
         foreach($this->getConfigurations() as $config) {
             $migrations = array_merge($migrations, $config->getMigrationsToExecute($direction, $to));
         }
+        
+        usort($migrations, function($a, $b) use ($direction) {
+            return ($a->getVersion() - $b->getVersion()) * ($direction == 'down' ? -1 : 1);
+        });
+        
         return $migrations;
     }
 }
