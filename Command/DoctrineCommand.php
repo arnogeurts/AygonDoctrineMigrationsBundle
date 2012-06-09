@@ -1,5 +1,12 @@
 <?php
-
+/*
+ * This file is part of the DoctrineMigrationsBundle package.
+ *
+ * (c) Arno Geurts
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Aygon\DoctrineMigrationsBundle\Command;
 
 use Doctrine\DBAL\Migrations\Tools\Console\Command\AbstractCommand as BaseCommand;
@@ -13,6 +20,11 @@ use Doctrine\DBAL\Connection;
 use Aygon\DoctrineMigrationsBundle\Migrations\Configuration\NamedConfiguration;
 use Aygon\DoctrineMigrationsBundle\Migrations\Configuration\CollectionConfiguration;
 
+/**
+ * This class implements the basic functionality to add to the doctrine commands
+ *
+ * @author Arno Geurts
+ */
 abstract class DoctrineCommand extends BaseCommand
 {
     /**

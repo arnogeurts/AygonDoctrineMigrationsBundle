@@ -1,0 +1,21 @@
+{
+    "name": "aygon/doctrine-migrations-bundle",
+    "type": "symfony-bundle",
+    "description": "Add Doctrine Migrations to Symfony2",
+    "keywords": ["doctrine", "migrations"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Arno Geurts"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "symfony/framework-bundle": ">=2.0,<2.2",
+        "symfony/doctrine-bundle": ">=2.0,<2.2"
+    },
+    "autoload": {
+        "psr-0": { "Aygon\\DoctrineMigrationsBundle": "" }
+    },
+    "target-dir": "Aygon/DoctrineMigrationsBundle"
+}
