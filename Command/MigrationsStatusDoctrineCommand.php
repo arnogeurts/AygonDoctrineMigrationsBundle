@@ -10,9 +10,9 @@
 namespace Aygon\DoctrineMigrationsBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Bundle\DoctrineBundle\Command\Proxy\DoctrineCommandHelper;
+use Symfony\Component\Console\Output\OutputInterface;
+use Doctrine\Bundle\DoctrineBundle\Command\Proxy\DoctrineCommandHelper;
 use Doctrine\DBAL\Migrations\Tools\Console\Command\StatusCommand;
 
 /**
